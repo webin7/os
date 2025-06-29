@@ -1,0 +1,117 @@
+Termwork – 8 : File allocation strategies
+Date : 10/03/2025
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_BLOCKS 100
+
+//block status : 0=free, 1=allocated
+int disk[MAX_BLOCKS] = {0};
+
+//Function to allocate file using sequential allocation
+void sequential_allocation(int start,int length){
+    if(start + length > MAX_BLOCKS){
+        printf("Error: Not enough contiguous state!\n");
+        return;
+    }
+
+    //check if blocks are free
+    for(int i=start;i<start+length;i++){
+        if(disk[i]==1){
+            printf("Error : Block %d is already allocated!\n",i);
+            return;
+        }
+    }
+
+    //Allocated blocks
+    for(int i=start;i<start+length;i++){
+        disk[i]=1;
+    }
+    printf("File allocated using Sequential Allocation from Block %d to %d\n",start,start+length-1);
+}
+
+//Node structure for linked allocation
+typedef struct Node{
+    int block;
+    struct Node* next;
+}Node;
+
+//fun to allocate file using linked allocation
+void linked_allocation(int blocks[],int length){
+    Node* head=NULL;
+    Node* temp=NULL;
+
+    //Allocated blocks
+    for(int i=0;i<length;i++){
+        if(disk[blocks[i]]==1){
+            printf("Error : Block %d is already allocated!\n",blocks[i]);
+            return;
+        }
+        disk[blocks[i]]=1;
+
+        //create new node
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        newNode->block = blocks[i];
+        newNode->next = NULL;
+
+        if(head==NULL){
+            head=newNode;
+            temp=newNode;
+        }else{
+            temp->next = newNode;
+            temp=newNode;
+        }
+    }
+
+    //print allocation
+    printf("File allocated using Linked Allocation at blocks : ");
+    temp=head;
+    while(temp!=NULL){
+        printf("%d -> ",temp->block);
+        temp=temp->next;
+    }
+    printf("NULL\n");
+    //Free allocated list
+    while(head!=NULL){
+        temp=head;
+        head=head->next;
+        free(temp);
+    }
+}
+
+int main()
+{
+    int ch,start,length,num_blocks,blocks[MAX_BLOCKS];
+    while(1){
+        printf("\nFile Allocation Methods : \n");
+        printf("1. Sequential Allocation\n");
+        printf("2. Linked Allocation\n");
+        printf("3. Exit\n");
+        printf("Enter choice : ");
+        scanf("%d",&ch);
+
+        switch(ch){
+            case 1:
+                printf("Enter start block and length : ");
+                scanf("%d %d",&start,&length);
+                sequential_allocation(start,length);
+                break;
+            case 2:
+                printf("Enter number of blocks : ");
+                scanf("%d",&num_blocks);
+                printf("Enter block numbers : ");
+                for(int i=0;i<num_blocks;i++)
+                    scanf("%d",&blocks[i]);
+                linked_allocation(blocks,num_blocks);
+                break;
+            case 3:
+                printf("\nExiting......\n");
+                exit(0);
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+
+    return 0;
+}

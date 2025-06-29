@@ -1,0 +1,114 @@
+Termwork – 4 : Process Synchronization - The Dining-Philosophers Problem
+Date : 03/03/2025
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_t* philosophers;
+pthread_mutex_t* forks;
+int philosophers_count;
+pthread_barrier_t barrier;  // Barrier to synchronize the start of all philosophers
+
+void eat(int i) {
+    printf("Philosopher %d is eating\n", i + 1);
+    sleep(1 + rand() % 10);
+}
+
+void* philosopher(void* args) {
+    int i = *((int*)args);  // Get philosopher's index directly from arguments
+    int first, second;
+
+    // Synchronize all philosophers to start together
+    pthread_barrier_wait(&barrier);  // Wait for all philosophers to be ready
+
+    while (1) {
+        printf("Philosopher %d is thinking\n", i + 1);
+        sleep(1 + rand() % 10);
+
+        first = i;
+        second = (i + 1) % philosophers_count;
+
+        // Lock forks in a consistent order (lower numbered fork first)
+        if (first > second) {
+            first = second;
+            second = i;
+        }
+
+        pthread_mutex_lock(&forks[first]);
+        pthread_mutex_lock(&forks[second]);
+
+        eat(i);
+
+        pthread_mutex_unlock(&forks[first]);
+        pthread_mutex_unlock(&forks[second]);
+    }
+
+    return NULL;
+}
+
+int main() {
+    int i, err;
+    srand(time(NULL)); // Seed the random number generator
+
+    printf("Enter the number of philosophers: ");
+    scanf("%d", &philosophers_count);
+
+    philosophers = (pthread_t*)malloc(philosophers_count * sizeof(pthread_t));
+    forks = (pthread_mutex_t*)malloc(philosophers_count * sizeof(pthread_mutex_t));
+
+    // Initialize mutexes for each fork
+    for (i = 0; i < philosophers_count; ++i) {
+        if (pthread_mutex_init(&forks[i], NULL) != 0) {
+            printf("Failed initializing fork %d\n", i + 1);
+            return 1;
+        }
+    }
+
+    // Initialize the barrier to synchronize the start of all threads
+    if (pthread_barrier_init(&barrier, NULL, philosophers_count) != 0) {
+        printf("Error initializing barrier\n");
+        return 1;
+    }
+
+    // Create threads for each philosopher
+    for (i = 0; i < philosophers_count; ++i) {
+        int* index = (int*)malloc(sizeof(int));
+        *index = i;
+
+        err = pthread_create(&philosophers[i], NULL, philosopher, (void*)index);
+        if (err != 0) {
+            printf("Error creating philosopher %d: %s\n", i + 1, strerror(err));
+            // Clean up already created threads and mutexes before exiting
+            for (int j = 0; j < i; ++j) {
+                pthread_cancel(philosophers[j]);
+                pthread_join(philosophers[j], NULL);
+            }
+            for (int j = 0; j < i; ++j) {
+                pthread_mutex_destroy(&forks[j]);
+            }
+            return 1;
+        } else {
+            printf("Successfully created philosopher %d\n", i + 1);
+        }
+    }
+
+    // Join all threads
+    for (i = 0; i < philosophers_count; ++i) {
+        pthread_join(philosophers[i], NULL);
+    }
+
+    // Clean up allocated memory and destroy mutexes
+    for (i = 0; i < philosophers_count; ++i) {
+        pthread_mutex_destroy(&forks[i]);
+    }
+    free(philosophers);
+    free(forks);
+
+    // Destroy the barrier
+    pthread_barrier_destroy(&barrier);
+
+    return 0;
+}

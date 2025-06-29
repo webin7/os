@@ -1,0 +1,72 @@
+Termwork – 6 : Deadlock – Banker’s algorithm
+Date : 24/03/2025
+
+//Modified Bankers Algorithm
+
+#include <stdio.h>
+
+void main()
+{
+    int process,resource,i,j,instance,k=0,count=0,m=0,h=0,outer,p,l;
+    printf("\nEnter the number of processes : ");
+    scanf("%d",&process);
+    l=process;
+    printf("\nEnter the number of resources : ");
+    scanf("%d",&resource);
+    int avail[resource],max[process][resource],allot[process][resource],need[process][resource],completed[process],pending[10];
+    for(i=0;i<process;i++){
+        completed[i]=0;
+        pending[i]=i;
+    }
+
+    printf("\nEnter number of Available Instances : ");
+    for(i=0;i<resource;i++){
+        scanf("%d",&avail[i]);
+    }
+
+    printf("\nEnter maximum number of instances resources that a process needs : \n");
+    for(i=0;i<process;i++){
+        printf("For p[%d] ",i);
+        for(j=0;j<resource;j++){
+            scanf("%d",&max[i][j]);
+        }
+    }
+
+    printf("\nEnter number of instances already allocated to the process of a resource : \n");
+        for(i=0;i<process;i++){
+        printf("For p[%d] ",i);
+        for(j=0;j<resource;j++){
+            scanf("%d",&allot[i][j]);
+
+            need[i][j]=max[i][j]-allot[i][j];
+        }
+    }
+
+    for(outer=process;outer>=0;outer--){
+        for(j=0;j<l;j++){
+            i=pending[j];
+            if(completed[j]!=1){
+                k=0;
+                for(m=0;m<resource;m++){
+                    if(need[i][m]<=avail[m]){
+                        k++;
+                    }
+                }
+                if(k==resource && completed[j]==0){
+                    printf("p[%d]\t",i);
+                    completed[j]=1;
+                    for(p=0;p<resource;p++){
+                        avail[p]=avail[p]+allot[j][p];
+                    }
+                    count++;
+                }
+            }
+        }
+    }
+    if(count==process){
+        printf("\nSafe Sequence exists\n");
+    }else{
+        printf("Not exists\n");
+    }
+
+}

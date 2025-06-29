@@ -1,0 +1,71 @@
+Termwork – 7 : Memory Management - Page replacement
+Date : 10/03/2025
+
+#include <stdio.h>
+
+#define MAX_FRAMES 3 //number of page frames
+#define MAX_PAGES 10 //number of pages
+
+//fun to check if a page is already in memory
+int is_page_in_frames(int frames[],int num_frames,int page){
+    for(int i=0;i<num_frames;i++){
+        if(frames[i]==page)
+            return 1;//page found in frames
+    }
+    return 0;//page not found
+}
+
+//FIFO page replacement algorithm
+void fifo_page_replacement(int pages[],int num_pages,int num_frames){
+    int frames[MAX_FRAMES];//page frames
+    int front=0;//points to the oldest page in queue
+    int page_faults=0;//page fault counter
+
+    //initialize frames to -1(empty)
+    for(int i=0;i<num_frames;i++){
+        frames[i]=-1;
+    }
+
+    printf("\nPage reference string : ");
+    for(int i=0;i<num_pages;i++)
+        printf("%d ",pages[i]);
+    printf("\n\n");
+
+    //process each request
+    for(int i=0;i<num_pages;i++){
+        int page=pages[i];
+
+        //check if the page is already in memory
+        if(!is_page_in_frames(frames,num_frames,page)){
+            //page fault occurs, replace the oldest page
+            frames[front]=page;
+            front = (front+1)%num_frames;//move pointer to the next page
+            page_faults++;
+
+            //print the frame content
+            printf("Page %d is loaded : ",page);
+            for(int j=0;j<num_frames;j++){
+                if(frames[j]!=-1)
+                    printf("%d ",frames[j]);
+                else
+                    printf("-");
+            }
+            printf("\n");
+        }
+        else{
+            printf("Page %d already in frames. No replacement needed.\n",page);
+        }
+    }
+    printf("\nTotal Page Faults : %d\n",page_faults);
+}
+
+int main()
+{
+    int pages[MAX_PAGES]={1,3,0,3,5,6,3,5,1,3};//Example reference string
+    int num_pages=10;
+    int num_frames=MAX_FRAMES;
+
+    fifo_page_replacement(pages,num_pages,num_frames);
+
+    return 0;
+}
