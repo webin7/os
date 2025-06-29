@@ -8,52 +8,50 @@ FCFS Scheduling Program in C
 
 int main()
 {
-    int pid[15];
-    int bt[15];
-    int n;
-    printf("Enter the number of processes : ");
-    scanf("%d",&n);
+    int pid[15];    
+    int bt[15];      
+    int n;           
 
-    printf("Enter process id of all processes :  ");
-    for(int i=0;i<n;i++){
-        scanf("%d",&pid[i]);
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+
+    printf("Enter process id of all processes: ");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &pid[i]);
     }
 
-    printf("Enter burst time of all the processes : ");
-    for(int i=0;i<n;i++){
-        scanf("%d",&bt[i]);
+    printf("Enter burst time of all the processes: ");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &bt[i]);
     }
 
-    int wt[n];
-    wt[0]=0;
-    //calculating waiting time of each process
-    for(int i=1;i<n;i++){
-        wt[i]=bt[i-1]+wt[i-1];
+    int wt[n];       
+    wt[0] = 0;       
+
+
+    for(int i = 1; i < n; i++) {
+        wt[i] = bt[i - 1] + wt[i - 1];
     }
 
-    printf("Process ID      Burst Time      Waiting Time    Turnaround Time\n");
-    float twt=0.0;
-    float ttt=0.0;
-    for(int i=0;i<n;i++){
-        printf("%d\t\t",pid[i]);
-        printf("%d\t\t",bt[i]);
-        printf("%d\t\t",wt[i]);
-        //calculating and printing turnaround time for each process
-        printf("%d\t\t",bt[i]+wt[i]);
-        printf("\n");
-        //total waiting time
-        twt+=wt[i];
-        //total turnaround time
-        ttt=wt[i]+bt[i];
+    printf("Process ID\tBurst Time\tWaiting Time\tTurnaround Time\n");
+
+    float twt = 0.0;  
+    float ttt = 0.0;  
+
+    for(int i = 0; i < n; i++) {
+        int tat = bt[i] + wt[i]; // Turnaround time = BT + WT
+        printf("%d\t\t%d\t\t%d\t\t%d\n", pid[i], bt[i], wt[i], tat);
+
+        twt += wt[i];    
+        ttt += tat;      
     }
-    //avg wating time
-    float awt=twt/n;
-    //avg turnaround time
-    float att=ttt/n;
 
-    printf("Avg. waiting time = %f\n",awt);
-    printf("Avg. turnaround time = %f\n",att);
+    float awt = twt / n;  
+    float att = ttt / n; 
 
+    printf("Avg. waiting time = %.2f\n", awt);
+    printf("Avg. turnaround time = %.2f\n", att);
 
     return 0;
 }
@@ -86,62 +84,59 @@ Termwork – 2B : SJF Scheduling Algorithm
 SJF Scheduling Program in C
 */
 #include <stdio.h>
-#include <stdlib.h>
 
-int main()
-{
-    int bt[20],p[20],wt[20],tat[20],i,j,n,total=0,totalT=0,temp;
-    float avg_wt,avg_tat;
-    printf("Enter the number of processes : ");
-    scanf("%d",&n);
+int main() {
+    int n, i, j;
+    int bt[20], p[20], wt[20], tat[20];
+    float total_wt = 0, total_tat = 0;
 
-    printf("\nEnter Burst Time:\n");
-    for(i=0;i<n;i++){
-        printf("p%d : ",i+1);
-        scanf("%d",&bt[i]);
-        p[i]=i+1;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+   
+    for(i = 0; i < n; i++) {
+        printf("Enter burst time for process %d: ", i + 1);
+        scanf("%d", &bt[i]);
+        p[i] = i + 1; // Process ID
     }
 
-    for(i=0;i<n;i++){
-        for(j=0;j<n-i-1;j++){
-            if(bt[j]>bt[j+1]){
-                temp=bt[j];
-                bt[j]=bt[j+1];
-                bt[j+1]=temp;
-                temp=p[j];
-                p[j]=p[j+1];
-                p[j+1]=temp;
+   
+    for(i = 0; i < n - 1; i++) {
+        for(j = i + 1; j < n; j++) {
+            if(bt[i] > bt[j]) {
+                // Swap burst time
+                int temp = bt[i];
+                bt[i] = bt[j];
+                bt[j] = temp;
+
+                // Swap process ID
+                temp = p[i];
+                p[i] = p[j];
+                p[j] = temp;
             }
         }
     }
-    wt[0]=0;
-    tat[0]=bt[0];
-    //Waiting time and turnaround time
-    for(i=1;i<n;i++){
-        wt[i]=0;
-        wt[i]=bt[i-1]+wt[i-1];
-        tat[i]=bt[i]+wt[i];
+
+    wt[0] = 0;
+    tat[0] = bt[0];
+
+ 
+    for(i = 1; i < n; i++) {
+        wt[i] = wt[i - 1] + bt[i - 1];
+        tat[i] = wt[i] + bt[i];
     }
 
-    printf("Process ID      Burst Time      Waiting Time    Turnaround Time\n");
-    for(int i=0;i<n;i++){
-        printf("%d\t\t",p[i]);
-        printf("%d\t\t",bt[i]);
-        printf("%d\t\t",wt[i]);
-        printf("%d\t\t",tat[i]);
-        printf("\n");
 
-        total+=wt[i];
-        totalT+=tat[i];
+    printf("\nProcess\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for(i = 0; i < n; i++) {
+        printf("P%d\t%d\t\t%d\t\t%d\n", p[i], bt[i], wt[i], tat[i]);
+        total_wt += wt[i];
+        total_tat += tat[i];
     }
 
-    //avg wating time
-    avg_wt=(float)total/n;
-    //avg turnaround time
-    avg_tat=(float)totalT/n;
-
-    printf("Avg. waiting time = %f\n",avg_wt);
-    printf("Avg. turnaround time = %f\n",avg_tat);
+    printf("\nAverage Waiting Time = %.2f", total_wt / n);
+    printf("\nAverage Turnaround Time = %.2f\n", total_tat / n);
 
     return 0;
 }
+
