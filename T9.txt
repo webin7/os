@@ -1,0 +1,42 @@
+TW9
+#!/bin/bash
+
+# Create a new directory named 'test_dir'
+mkdir test_dir
+echo "Directory 'test_dir' created."
+
+# Change to the new directory
+cd test_dir
+echo "Changed to directory 'test_dir'."
+
+# Create a sample file
+echo "This is a test file." > file1.txt
+echo "File 'file1.txt' created."
+
+# Display contents of the file
+echo "Contents of 'file1.txt':"
+cat file1.txt
+
+# Copy the file to a new file
+cp file1.txt file2.txt
+echo "File 'file1.txt' copied to 'file2.txt'."
+
+# Move/rename the copied file
+mv file2.txt renamed_file.txt
+echo "File 'file2.txt' renamed to 'renamed_file.txt'."
+
+# Remove renamed file
+rm renamed_file.txt
+echo "File 'renamed_file.txt' deleted."
+
+# Remove the original file
+rm file1.txt
+echo "File 'file1.txt' deleted."
+
+# Move back to the parent directory
+cd ..
+echo "Returned to the parent directory."
+
+# Remove the created directory
+rmdir test_dir
+echo "Directory 'test_dir' removed."
